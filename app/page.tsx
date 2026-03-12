@@ -1,64 +1,125 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import labelChorizo from "./assets/label-chorizo.png";
 
 export default function Home() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [isReady, setIsReady] = useState(false);
+
+  const formattedDate = useMemo(() => {
+    if (!selectedDate) return "";
+    const [year, month, day] = selectedDate.split("-").map(Number);
+    if (!year || !month || !day) return "";
+    const date = new Date(year, month - 1, day);
+    return new Intl.DateTimeFormat("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
+  }, [selectedDate]);
+
+  useEffect(() => {
+    const image = new Image();
+    image.src = labelChorizo.src;
+    image.onload = () => {
+      imageRef.current = image;
+      setIsReady(true);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || !canvasRef.current || !imageRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const { width, height } = imageRef.current;
+    canvas.width = width;
+    canvas.height = height;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(imageRef.current, 0, 0, width, height);
+
+    if (formattedDate) {
+      ctx.font = "28px Arial";
+      ctx.fillStyle = "#111111";
+      ctx.textBaseline = "middle";
+      ctx.fillText(formattedDate, 1040, 260);
+    }
+  }, [formattedDate, isReady]);
+
+  const handleGenerate = () => {
+    if (!canvasRef.current) return;
+    const link = document.createElement("a");
+    const safeDate = selectedDate || "sin-fecha";
+    link.download = `etiqueta-${safeDate}.png`;
+    link.href = canvasRef.current.toDataURL("image/png");
+    link.click();
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-zinc-50 px-6 py-12 text-zinc-900">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-10">
+        <header className="flex flex-col gap-3">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-500">
+            Generador de etiquetas
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <h1 className="text-3xl font-semibold leading-tight text-zinc-900 sm:text-4xl">
+            Etiqueta de chorizo con fecha de caducidad
+          </h1>
+          <p className="max-w-2xl text-base text-zinc-600">
+            Selecciona una fecha y genera la etiqueta lista para descargar en
+            formato PNG.
+          </p>
+        </header>
+
+        <section className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="flex flex-col gap-4">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <canvas
+                ref={canvasRef}
+                className="h-auto w-full rounded-xl border border-zinc-200 bg-white"
+                aria-label="Vista previa de la etiqueta"
+              />
+            </div>
+            <p className="text-sm text-zinc-500">
+              La fecha se agrega junto al texto &quot;Fecha de caducidad:&quot;.
+              Ajusta la posición en el código si el diseño cambia.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="fecha" className="text-sm font-medium text-zinc-700">
+                Fecha de caducidad
+              </label>
+              <input
+                id="fecha"
+                name="fecha"
+                type="date"
+                lang="es-MX"
+                className="h-11 rounded-xl border border-zinc-300 px-4 text-base text-zinc-900 shadow-sm focus:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-200"
+                value={selectedDate}
+                onChange={(event) => setSelectedDate(event.target.value)}
+              />
+              <span className="text-xs text-zinc-500">
+                Formato mostrado: {formattedDate || "dd/mm/aaaa"}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGenerate}
+              className="h-12 rounded-full bg-zinc-900 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-zinc-800"
+            >
+              Generar
+            </button>
+          </div>
+        </section>
       </main>
     </div>
   );
