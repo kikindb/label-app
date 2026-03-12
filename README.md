@@ -1,24 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Label App
 
-## Getting Started
+Label App is a Next.js project that generates labels for a very specific use case. It provides a focused workflow for building and previewing labels, with fast iteration via the Next.js App Router and a local development server.
 
-First, run the development server:
+## Features
+
+- Purpose-built label generation flow
+- Fast local preview for layout tweaks
+- Next.js App Router architecture
+- TypeScript-first codebase
+
+## Requirements
+
+- Node.js 18+ (LTS recommended)
+- pnpm 8+
+
+## Getting Started (pnpm)
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+Run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
+
+```bash
+pnpm dev        # Start the dev server
+pnpm build      # Create a production build
+pnpm start      # Run the production server
+pnpm lint       # Run linting
+```
+
+## Project Structure
+
+```
+app/            # App Router routes and pages
+public/         # Static assets
+```
+
+## Configuration
+
+If you need environment variables, create a `.env.local` file at the project root. Add only the keys your deployment environment expects. Do not commit secrets.
+
+## Deployment
+
+This project can be deployed to any Node.js host that supports Next.js. If you use Vercel, the default settings work well for App Router projects.
 
 ## Learn More
 
