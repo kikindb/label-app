@@ -94,21 +94,32 @@ export default function Home() {
 
     const pageWidth = 11;
     const pageHeight = 8.5;
-    const cols = 3;
-    const rows = 4;
-    const cellWidth = pageWidth / cols;
-    const cellHeight = pageHeight / rows;
+    const cols = 2;
+    const rows = 6;
+
+    const marginX = 0.15;
+    const marginY = 0.2;
+    const gapX = 0.08;
+    const gapY = 0.08;
+
+    const availableWidth = pageWidth - marginX * 2 - gapX * (cols - 1);
+    const availableHeight = pageHeight - marginY * 2 - gapY * (rows - 1);
 
     const labelAspect = 1500 / 349;
-    const labelWidth = cellWidth * 0.95;
+    const maxLabelWidthFromWidth = availableWidth / cols;
+    const maxLabelWidthFromHeight = (availableHeight / rows) * labelAspect;
+    const labelWidth = Math.min(maxLabelWidthFromWidth, maxLabelWidthFromHeight);
     const labelHeight = labelWidth / labelAspect;
+
+    const gridWidth = cols * labelWidth + gapX * (cols - 1);
+    const gridHeight = rows * labelHeight + gapY * (rows - 1);
+    const startX = (pageWidth - gridWidth) / 2;
+    const startY = (pageHeight - gridHeight) / 2;
 
     for (let row = 0; row < rows; row += 1) {
       for (let col = 0; col < cols; col += 1) {
-        const cellX = col * cellWidth;
-        const cellY = row * cellHeight;
-        const x = cellX + (cellWidth - labelWidth) / 2;
-        const y = cellY + (cellHeight - labelHeight) / 2;
+        const x = startX + col * (labelWidth + gapX);
+        const y = startY + row * (labelHeight + gapY);
         pdf.addImage(dataUrl, 'PNG', x, y, labelWidth, labelHeight);
       }
     }
