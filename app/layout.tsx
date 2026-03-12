@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Label App",
+  title: "Chorizo Guadiana - Generador de Etiquetas",
   description: "Generador de etiquetas con fecha de caducidad",
 };
 
