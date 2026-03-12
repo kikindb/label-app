@@ -1,5 +1,6 @@
 'use client';
 
+import { jsPDF } from 'jspdf';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import labelChorizo from './assets/label-chorizo.png';
 
@@ -81,6 +82,41 @@ export default function Home() {
     link.click();
   };
 
+  const handlePrintPdf = () => {
+    if (!canvasRef.current) return;
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'in',
+      format: 'letter',
+    });
+
+    const pageWidth = 11;
+    const pageHeight = 8.5;
+    const cols = 3;
+    const rows = 4;
+    const cellWidth = pageWidth / cols;
+    const cellHeight = pageHeight / rows;
+
+    const labelAspect = 1500 / 349;
+    const labelWidth = cellWidth * 0.95;
+    const labelHeight = labelWidth / labelAspect;
+
+    for (let row = 0; row < rows; row += 1) {
+      for (let col = 0; col < cols; col += 1) {
+        const cellX = col * cellWidth;
+        const cellY = row * cellHeight;
+        const x = cellX + (cellWidth - labelWidth) / 2;
+        const y = cellY + (cellHeight - labelHeight) / 2;
+        pdf.addImage(dataUrl, 'PNG', x, y, labelWidth, labelHeight);
+      }
+    }
+
+    const safeDate = selectedDate || 'sin-fecha';
+    pdf.save(`etiquetas-${safeDate}.pdf`);
+  };
+
   return (
     <div className='min-h-screen bg-zinc-50 px-6 py-12 text-zinc-900'>
       <main className='mx-auto flex w-full max-w-5xl flex-col gap-10'>
@@ -134,13 +170,22 @@ export default function Home() {
               </span>
             </div>
 
-            <button
-              type='button'
-              onClick={handleGenerate}
-              className='h-12 rounded-full bg-zinc-900 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-zinc-800'
-            >
-              Generar
-            </button>
+            <div className='flex flex-col gap-3'>
+              <button
+                type='button'
+                onClick={handleGenerate}
+                className='h-12 rounded-full bg-zinc-900 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-zinc-800'
+              >
+                Generar
+              </button>
+              <button
+                type='button'
+                onClick={handlePrintPdf}
+                className='h-12 rounded-full border border-zinc-300 bg-white text-sm font-semibold uppercase tracking-wider text-zinc-800 transition hover:border-zinc-400 hover:bg-zinc-50'
+              >
+                Imprimir
+              </button>
+            </div>
           </div>
         </section>
       </main>
